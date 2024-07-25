@@ -7,6 +7,7 @@ from datasets import DInterface
 from model import MInterface
 from pytorch_lightning.loggers import WandbLogger, CSVLogger
 import pandas as pd
+from tqdm import tqdm
 import wandb
 
 def train(args):
@@ -67,10 +68,8 @@ def predict(args):
     model.eval()
     test_pred = []
     with torch.no_grad():
-        for batch in test_loader:
-            print(batch)  # Print the batch to inspect its structure
+        for batch in tqdm(test_loader, desc="Predicting"):  # Add progress bar
             # Process the batch based on its actual structure
-            # Example: if batch is a Tensor, directly move to device
             if isinstance(batch, torch.Tensor):
                 x = batch
                 x = x.to(device)
@@ -93,15 +92,15 @@ if __name__ == '__main__':
     parser.add_argument('--data_dir', type=str, default='data/')
     parser.add_argument('--batch_size', type=int, default=512)
     parser.add_argument('--num_workers', type=int, default=16)
-    parser.add_argument('--input_dim', type=int, default=10)
+    parser.add_argument('--input_dim', type=int, default=11)
     parser.add_argument('--num_heads', type=int, default=4)
     parser.add_argument('--lr', type=float, default=3e-2)
     parser.add_argument('--max_epochs', type=int, default=10)
     parser.add_argument('--val_split', type=float, default=0.2)
     parser.add_argument('--dropout_rate', type=float, default=0.5)
-    parser.add_argument('--is_train', type=bool, default=True)
+    parser.add_argument('--is_train', type=bool, default=False)
     parser.add_argument('--model_checkpoint', type=str, 
-                        default='logs/zzh/version_2/checkpoints/epoch=0-step=17977.ckpt')
+                        default='logs/zzh/version_13/checkpoints/epoch=0-step=17977.ckpt')
     torch.set_float32_matmul_precision('medium')
     args = parser.parse_args()
     if args.is_train:

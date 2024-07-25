@@ -8,10 +8,10 @@ class MInterface(LightningModule):
     def __init__(self, input_dim, lr, num_heads, dropout_rate=0.5):
         super(MInterface, self).__init__()
         self.model = InsuranceModel(input_dim, num_heads, dropout_rate)
-        self.criterion = nn.MSELoss()
+        self.criterion = nn.BCEWithLogitsLoss()
         self.lr = lr
 
-        self.f1_score = torchmetrics.F1Score(task='binary', threshold=0.5)
+        self.f1_score = torchmetrics.F1Score(task='binary')
         self.accuracy = torchmetrics.Accuracy(task='binary')
         self.precision = torchmetrics.Precision(task='binary')
         self.recall = torchmetrics.Recall(task='binary')
@@ -19,12 +19,12 @@ class MInterface(LightningModule):
     def forward(self, x):
         return self.model(x)
 
-    def training_step(self, batch):
+    def training_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self.forward(x)
         loss = self.criterion(y_hat, y.unsqueeze(1))
 
-        preds = torch.round(y_hat)
+        preds = torch.sigmoid(y_hat).round()
         f1 = self.f1_score(preds, y.unsqueeze(1))
         acc = self.accuracy(preds, y.unsqueeze(1))
         precision = self.precision(preds, y.unsqueeze(1))
@@ -38,12 +38,12 @@ class MInterface(LightningModule):
 
         return loss
 
-    def validation_step(self, batch):
+    def validation_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self.forward(x)
         loss = self.criterion(y_hat, y.unsqueeze(1))
 
-        preds = torch.round(y_hat)
+        preds = torch.sigmoid(y_hat).round()
         f1 = self.f1_score(preds, y.unsqueeze(1))
         acc = self.accuracy(preds, y.unsqueeze(1))
         precision = self.precision(preds, y.unsqueeze(1))

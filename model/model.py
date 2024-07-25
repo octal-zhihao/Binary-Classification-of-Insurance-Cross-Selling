@@ -9,7 +9,6 @@ class InsuranceModel(nn.Module):
         self.layer_2 = nn.Linear(64, 32)
         self.layer_3 = nn.Linear(32, 1)
         self.relu = nn.ReLU()
-        self.sigmoid = nn.Sigmoid()
         self.dropout = nn.Dropout(dropout_rate)
         # 多头注意力机制
         self.attention = nn.MultiheadAttention(embed_dim=64, num_heads=num_heads)
@@ -24,5 +23,5 @@ class InsuranceModel(nn.Module):
 
         x = self.relu(self.layer_2(x))
         x = self.dropout(x)
-        x = self.sigmoid(self.layer_3(x))
+        x = self.layer_3(x)
         return x
